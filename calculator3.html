@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculator Project</title>
+    <link rel="stylesheet" type="text/css" href="calcstyle.css">
+</head>
+<body>
+<main id="calculator">
+<div id="container">
+<div id="calcDisplay">
+<input type="text" id="display" placeholder="" value="">
+</div>
+
+    <button id="clear">AC</button>
+    <button value="+/-" class="negpos">+/-</button>
+    <button value="%" class="perc">%</button>
+    <button id="divide" value="/" class="op">/</button>
+
+
+    <button id="7" value="7" class="num">7</button>
+    <button id="8" value="8" class="num">8</button>
+    <button id="9" value="9" class="num">9</button>
+    <button id="*" value="*" class="op">*</button>
+
+
+    <button id="4" value="4" class="num">4</button>
+    <button id="5" value="5" class="num">5</button>
+    <button id="6" value="6" class="num">6</button>
+    <button id="-" value="-" class="op">-</button>
+
+    <button id="1" value="1" class="num">1</button>
+    <button id="2" value="2" class="num">2</button>
+    <button id="3" value="3" class="num">3</button>
+    <button id="+" value="+" class="op">+</button>
+
+    <button id="zero" value="0" class="num">0</button>
+    <button id="." value="." class="dec">.</button>
+    <button id="eq" value="=" class="eq">=</button>
+    
+</div>
+</div>
+</main>
+<script>
+/*BUGS LEFT TO FIX:
+- Deleting the zero if it appears as the first character in the string.
+- Dealing with Javascript weirdness when multiplying a float by a large number i.e. 0.069 * 13000 = 897.0000000001
+*/ 
+
+function add (x, y) {
+    return x + y;
+}
+
+function subtract (x, y) {
+    return x - y;
+}
+
+function multiply (x, y) {
+    return x * y;
+}
+
+function divide (x, y) {
+    if (y == 0) {
+        alert('error: cannot divide by 0.');
+        return 0;
+    }
+    else {
+        return x / y;
+    }
+}
+
+function operate (a, op, b) {
+    if (op == '+') { return add(a, b) }
+    else if (op == '-') { return subtract(a, b)}
+    else if (op == '*') { return multiply(a, b)}
+    else if (op == '/') { return divide(a, b)}
+}
+let buttons = Array.from(document.querySelectorAll('button'))
+let numButtons = Array.from(document.querySelectorAll('.calcBtns .num'));
+let opButtons = Array.from(document.querySelectorAll('.calcBtns .op'));
+let eqButton = document.querySelector('.calcBtns #eq')
+let clearBtn = document.querySelector('#clear');
+const textDisplay = document.querySelector('#calcDisplay input')
+let answer;
+
+textDisplay.value = ''
+
+const clickCalc = function (arr) {
+    for (let i=0; i<arr.length; i++) {
+        arr[i].addEventListener('click', function () {
+            if (arr[i].classList == 'num' && answer == undefined) {
+                changeDisplay(arr[i]);
+            }
+            else if (arr[i].classList == 'num' && !(answer == undefined)) {
+                console.log(arr[i].id)
+                clearDisplay(arr[i].value)
+            }
+            else if (arr[i].classList == 'op') {
+                getOp(arr[i]);
+                getVar(textDisplay.value);
+                textDisplay.value = '';
+            }
+            else if (arr[i].classList == 'negpos') {
+                checkNegPos(textDisplay);
+            }
+            else if (arr[i].classList == 'dec') {
+                if (!textDisplay.value.includes('.')) {
+                    textDisplay.value += '.';
+                    textDisplay.placeholder += '.';
+                }
+            }
+            if (arr[i].classList == 'perc') {
+                textDisplay.value = Number(textDisplay.value) / 100;
+                textDisplay.placeholder = textDisplay.value;
+            };
+            if (arr[i].id == 'eq') {
+                getVar(textDisplay.value);
+                if (!(operators[0] == '')) {;
+                    answer = createEquation();
+                    console.log(answer)
+                    displayAnswer(answer);
+                    clearArr();
+                }
+                
+            }
+            if (arr[i].id == 'clear') {
+                clearArr();
+                clearDisplay();
+            }
+    })}};
+
+clickCalc(buttons);
+let variables = ['', '']
+let operators = ['']
+const getVar = function (item) {
+    if (variables[0] == '') {
+        item = checkDec(item); 
+        variables[0] = Number(item);
+    }
+    else if (variables[1] == '') {
+        item = checkDec(item);
+        variables[1] = Number(item);
+    }
+    else {
+        item = checkDec(item);
+        variables.push(Number(item));
+    }
+}
+
+const clearDisplay = function (b = '') {
+    textDisplay.value = b;
+    textDisplay.placeholder = Number(b);
+    answer = undefined;
+}
+const checkDec = function (item) {
+    if (!(typeof(item) == 'string')) { item = String(item)};
+    if (item.includes('.')) {
+            let index = item.indexOf('.');
+            let length = item.length;
+            let decimals = Math.min((length-index), 9);
+            item = Number.parseFloat(item).toFixed(decimals);
+        }
+    return item;
+}
+
+const checkNegPos = function (item) {
+    if (!(item.value.startsWith('-'))) {
+                    textDisplay.value = '-' + item.value;
+                    textDisplay.placeholder = item.value;
+            }
+    else if (item.value.startsWith('-')) {
+                    textDisplay.value = item.value.slice(1, item.value.length);
+                    textDisplay.placeholder = item.value;
+                }
+}
+const clearArr = function () {
+    variables = ['', ''];
+    operators = [''];
+}
+
+const getOp = function (item) {
+    if (operators[0] == '') {
+        operators[0] = item.value;
+    }
+    else {
+        const newop = operators.push(item.value);
+    }
+};
+
+const changeDisplay = function (item) {
+    textDisplay.value += item.value;
+    textDisplay.placeholder = textDisplay.value;
+}
+
+
+const displayAnswer = function (item) {
+    textDisplay.value = item;
+    textDisplay.placeholder = textDisplay.value;
+}
+
+const createEquation = function() {
+    console.log(variables, operators)
+    let j = 0;
+    let i = 0;
+    while (j <= operators.length - 1 && i <= variables.length - 2) {
+        const answer = operate(variables[i], operators[j], variables[i+1]);
+        console.log(variables[i], operators[j], variables[i+1], "=", answer)
+        variables[i + 1] = answer;
+        j++;
+        i++;
+        }
+        variables[i] = checkDec(variables[i]);
+    return variables[i];
+};
+</script>
+</body>
+</html>
